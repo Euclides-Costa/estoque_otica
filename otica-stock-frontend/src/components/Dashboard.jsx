@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import {
     Package, AlertTriangle, Calendar, DollarSign,
-    TrendingUp, TrendingDown, Eye, Box, Truck,
-    ArrowUpRight, ArrowDownRight, Search, Plus,
-    X, CheckCircle, Clock
+    TrendingUp, TrendingDown, Eye, Truck, ArrowUpRight,
+    ArrowDownRight, CheckCircle, Clock, Box
 } from 'lucide-react';
 import api from '../services/api';
 
 const Dashboard = ({ products }) => {
     const [alertasEstoque, setAlertasEstoque] = useState([]);
-    const [showMovementForm, setShowMovementForm] = useState(false);
     const [movementType, setMovementType] = useState('ENTRADA');
     const [movementData, setMovementData] = useState({
         productId: '',
@@ -54,7 +52,6 @@ const Dashboard = ({ products }) => {
                 });
             }
             alert('Movimento registrado com sucesso!');
-            setShowMovementForm(false);
             setMovementData({ productId: '', quantity: 1, loteCodigo: '', validade: '', notaFiscal: '' });
             window.location.reload();
         } catch (err) {
@@ -62,130 +59,123 @@ const Dashboard = ({ products }) => {
         }
     };
 
+    const stats = [
+        {
+            title: 'Total em Estoque',
+            value: totalItems.toLocaleString('pt-BR'),
+            subtitle: 'unidades',
+            icon: Package,
+            change: '+12.5%',
+            trend: 'up',
+            bgColor: 'bg-blue-50',
+            iconColor: 'text-blue-600'
+        },
+        {
+            title: 'Valor em Estoque',
+            value: `R$ ${totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+            subtitle: 'valor total',
+            icon: DollarSign,
+            change: '+8.2%',
+            trend: 'up',
+            bgColor: 'bg-green-50',
+            iconColor: 'text-green-600'
+        },
+        {
+            title: 'Produtos Vencendo',
+            value: '0',
+            subtitle: 'próximos 30 dias',
+            icon: Calendar,
+            change: '0 este mês',
+            trend: 'down',
+            bgColor: 'bg-yellow-50',
+            iconColor: 'text-yellow-600'
+        },
+        {
+            title: 'Estoque Baixo',
+            value: lowStockCount,
+            subtitle: 'abaixo do mínimo',
+            icon: AlertTriangle,
+            change: `+${lowStockCount}`,
+            trend: lowStockCount > 0 ? 'up' : 'down',
+            bgColor: lowStockCount > 0 ? 'bg-red-50' : 'bg-gray-50',
+            iconColor: lowStockCount > 0 ? 'text-red-600' : 'text-gray-600'
+        }
+    ];
+
     return (
         <div>
             {/* Header */}
-            <div className="mb-6">
-                <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
-                <p className="text-sm text-gray-500 mt-1">Visão geral do seu estoque de ótica</p>
+            <div className="mb-8">
+                <h1 className="text-2xl font-semibold text-gray-800">Dashboard</h1>
+                <p className="text-sm text-gray-500 mt-1">Visão geral do seu negócio</p>
+            </div>
+
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                {stats.map((stat, index) => (
+                    <div key={index} className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className={`${stat.bgColor} rounded-xl p-3`}>
+                                <stat.icon size={22} className={stat.iconColor} />
+                            </div>
+                            <div className={`flex items-center space-x-1 text-xs font-medium ${
+                                stat.trend === 'up' ? 'text-green-600' : 'text-gray-500'
+                            }`}>
+                                {stat.trend === 'up' ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+                                <span>{stat.change}</span>
+                            </div>
+                        </div>
+                        <p className="text-2xl font-bold text-gray-800">{stat.value}</p>
+                        <p className="text-sm text-gray-600 mt-1">{stat.title}</p>
+                        <p className="text-xs text-gray-400 mt-2">{stat.subtitle}</p>
+                    </div>
+                ))}
             </div>
 
             {/* Two Column Layout */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Left Column - Cards e Tabela */}
-                <div className="lg:col-span-2 space-y-6">
-                    {/* Stats Cards Row 1 */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        {/* Card Total em Estoque */}
-                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition-all">
-                            <div className="flex items-center justify-between mb-3">
-                                <div className="bg-blue-100 rounded-lg p-2.5">
-                                    <Package size={18} className="text-blue-600" />
-                                </div>
-                                <div className="flex items-center space-x-1 text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
-                                    <ArrowUpRight size={14} />
-                                    <span>+12.5%</span>
-                                </div>
+                {/* Left Column - Products Table */}
+                <div className="lg:col-span-2">
+                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                                <AlertTriangle size={18} className="text-red-500" />
+                                <h2 className="text-base font-semibold text-gray-800">Produtos com Estoque Crítico</h2>
                             </div>
-                            <p className="text-2xl font-bold text-gray-800">{totalItems.toLocaleString('pt-BR')}</p>
-                            <p className="text-sm text-gray-600 mt-1">Total em Estoque</p>
-                            <p className="text-xs text-gray-400 mt-2">unidades</p>
+                            <button className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center space-x-1">
+                                <span>Ver todos os produtos</span>
+                                <ArrowUpRight size={14} />
+                            </button>
                         </div>
 
-                        {/* Card Valor em Estoque */}
-                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition-all">
-                            <div className="flex items-center justify-between mb-3">
-                                <div className="bg-green-100 rounded-lg p-2.5">
-                                    <DollarSign size={18} className="text-green-600" />
-                                </div>
-                                <div className="flex items-center space-x-1 text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
-                                    <ArrowUpRight size={14} />
-                                    <span>+8.2%</span>
-                                </div>
-                            </div>
-                            <p className="text-2xl font-bold text-gray-800">
-                                R$ {totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                            </p>
-                            <p className="text-sm text-gray-600 mt-1">Valor em Estoque</p>
-                            <p className="text-xs text-gray-400 mt-2">valor total</p>
-                        </div>
-                    </div>
-
-                    {/* Stats Cards Row 2 */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        {/* Card Produtos Vencendo */}
-                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition-all">
-                            <div className="flex items-center justify-between mb-3">
-                                <div className="bg-yellow-100 rounded-lg p-2.5">
-                                    <Calendar size={18} className="text-yellow-600" />
-                                </div>
-                                <div className="flex items-center space-x-1 text-xs font-medium text-gray-600 bg-gray-50 px-2 py-1 rounded-full">
-                                    <ArrowDownRight size={14} />
-                                    <span>0 este mês</span>
-                                </div>
-                            </div>
-                            <p className="text-2xl font-bold text-gray-800">0</p>
-                            <p className="text-sm text-gray-600 mt-1">Produtos Vencendo</p>
-                            <p className="text-xs text-gray-400 mt-2">próximos 30 dias</p>
-                        </div>
-
-                        {/* Card Estoque Baixo */}
-                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition-all">
-                            <div className="flex items-center justify-between mb-3">
-                                <div className="bg-red-100 rounded-lg p-2.5">
-                                    <AlertTriangle size={18} className="text-red-600" />
-                                </div>
-                                <div className={`flex items-center space-x-1 text-xs font-medium ${lowStockCount > 0 ? 'text-red-600 bg-red-50' : 'text-gray-600 bg-gray-50'} px-2 py-1 rounded-full`}>
-                                    <ArrowUpRight size={14} />
-                                    <span>{lowStockCount > 0 ? `+${lowStockCount}` : '0'}</span>
-                                </div>
-                            </div>
-                            <p className="text-2xl font-bold text-gray-800">{lowStockCount}</p>
-                            <p className="text-sm text-gray-600 mt-1">Estoque Baixo</p>
-                            <p className="text-xs text-gray-400 mt-2">abaixo do mínimo</p>
-                        </div>
-                    </div>
-
-                    {/* Produtos com Estoque Crítico Table */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                        <div className="px-5 py-4 border-b border-gray-200 bg-gray-50">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-2">
-                                    <AlertTriangle size={16} className="text-red-500" />
-                                    <h2 className="text-sm font-semibold text-gray-700">Produtos com Estoque Crítico</h2>
-                                </div>
-                                <button className="text-xs text-blue-600 hover:text-blue-700 font-medium">
-                                    Ver todos os produtos →
-                                </button>
-                            </div>
-                        </div>
                         <div className="overflow-x-auto">
                             <table className="w-full">
-                                <thead className="bg-gray-50 border-b border-gray-200">
+                                <thead className="bg-gray-50 border-b border-gray-100">
                                 <tr>
-                                    <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">PRODUTO</th>
-                                    <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">SKU</th>
-                                    <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">MARCA</th>
-                                    <th className="px-5 py-3 text-right text-xs font-semibold text-gray-600 uppercase">QTD</th>
-                                    <th className="px-5 py-3 text-right text-xs font-semibold text-gray-600 uppercase">MÍNIMO</th>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">PRODUTO</th>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">SKU</th>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">MARCA</th>
+                                    <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">QTD. ATUAL</th>
+                                    <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">MÍNIMO</th>
                                 </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-100">
+                                <tbody className="divide-y divide-gray-50">
                                 {alertasEstoque.length > 0 ? (
                                     alertasEstoque.map((product) => (
                                         <tr key={product.id} className="hover:bg-gray-50 transition-colors">
-                                            <td className="px-5 py-3 text-sm font-medium text-gray-800">{product.nome}</td>
-                                            <td className="px-5 py-3 text-sm text-gray-600">{product.sku}</td>
-                                            <td className="px-5 py-3 text-sm text-gray-600">{product.marca}</td>
-                                            <td className="px-5 py-3 text-right text-sm font-semibold text-red-600">{product.quantidadeAtual} un.</td>
-                                            <td className="px-5 py-3 text-right text-sm text-gray-500">{product.quantidadeMinima} un.</td>
+                                            <td className="px-6 py-4 text-sm font-medium text-gray-800">{product.nome}</td>
+                                            <td className="px-6 py-4 text-sm text-gray-500">{product.sku}</td>
+                                            <td className="px-6 py-4 text-sm text-gray-500">{product.marca}</td>
+                                            <td className="px-6 py-4 text-right text-sm font-semibold text-red-600">{product.quantidadeAtual} un.</td>
+                                            <td className="px-6 py-4 text-right text-sm text-gray-500">{product.quantidadeMinima} un.</td>
                                         </tr>
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan="5" className="px-5 py-8 text-center text-gray-500">
-                                            <Package size={32} className="mx-auto mb-2 text-gray-300" />
-                                            <p className="text-sm">Nenhum produto com estoque crítico</p>
+                                        <td colSpan="5" className="px-6 py-12 text-center">
+                                            <Package size={40} className="text-gray-300 mx-auto mb-3" />
+                                            <p className="text-sm text-gray-500">Nenhum produto com estoque crítico</p>
+                                            <p className="text-xs text-gray-400 mt-1">Todos os produtos estão dentro do estoque mínimo</p>
                                         </td>
                                     </tr>
                                 )}
@@ -195,28 +185,28 @@ const Dashboard = ({ products }) => {
                     </div>
                 </div>
 
-                {/* Right Column - Registrar Entrada Form */}
-                <div className="lg:col-span-1">
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 sticky top-6">
-                        <div className="px-5 py-4 border-b border-gray-200 bg-gray-50">
+                {/* Right Column - Register Entry Form */}
+                <div>
+                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                        <div className="px-6 py-4 border-b border-gray-100">
                             <div className="flex items-center space-x-2">
-                                <Truck size={16} className="text-blue-500" />
-                                <h2 className="text-sm font-semibold text-gray-700">Registrar Entrada</h2>
+                                <Truck size={18} className="text-blue-600" />
+                                <h2 className="text-base font-semibold text-gray-800">Registrar Entrada</h2>
                             </div>
                         </div>
 
-                        <form onSubmit={handleMovementSubmit} className="p-5 space-y-4">
+                        <form onSubmit={handleMovementSubmit} className="p-6 space-y-5">
                             {/* Tipo de Movimento */}
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-2">Tipo de Movimento</label>
-                                <div className="flex space-x-2">
+                                <label className="block text-xs font-medium text-gray-600 mb-2">Tipo de Movimento</label>
+                                <div className="flex gap-3">
                                     <button
                                         type="button"
                                         onClick={() => setMovementType('ENTRADA')}
-                                        className={`flex-1 py-2 text-sm rounded-lg transition-all ${
+                                        className={`flex-1 py-2.5 text-sm font-medium rounded-xl transition-all ${
                                             movementType === 'ENTRADA'
                                                 ? 'bg-blue-600 text-white shadow-md'
-                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                         }`}
                                     >
                                         Entrada (Compra)
@@ -224,10 +214,10 @@ const Dashboard = ({ products }) => {
                                     <button
                                         type="button"
                                         onClick={() => setMovementType('SAIDA')}
-                                        className={`flex-1 py-2 text-sm rounded-lg transition-all ${
+                                        className={`flex-1 py-2.5 text-sm font-medium rounded-xl transition-all ${
                                             movementType === 'SAIDA'
                                                 ? 'bg-blue-600 text-white shadow-md'
-                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                         }`}
                                     >
                                         Saída (Venda)
@@ -237,17 +227,17 @@ const Dashboard = ({ products }) => {
 
                             {/* Produto */}
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Produto *</label>
+                                <label className="block text-xs font-medium text-gray-600 mb-1.5">Produto *</label>
                                 <select
                                     required
                                     value={movementData.productId}
                                     onChange={(e) => setMovementData({ ...movementData, productId: e.target.value })}
-                                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
+                                    className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 bg-white"
                                 >
                                     <option value="">Selecionar um produto</option>
                                     {products.map(product => (
                                         <option key={product.id} value={product.id}>
-                                            {product.nome} - {product.sku} (Estoque: {product.quantidadeAtual})
+                                            {product.nome} - {product.sku}
                                         </option>
                                     ))}
                                 </select>
@@ -255,14 +245,14 @@ const Dashboard = ({ products }) => {
 
                             {/* Quantidade */}
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Quantidade *</label>
+                                <label className="block text-xs font-medium text-gray-600 mb-1.5">Quantidade *</label>
                                 <input
                                     type="number"
                                     required
                                     min="1"
                                     value={movementData.quantity}
                                     onChange={(e) => setMovementData({ ...movementData, quantity: e.target.value })}
-                                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
+                                    className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
                                 />
                             </div>
 
@@ -270,34 +260,34 @@ const Dashboard = ({ products }) => {
                             {movementType === 'ENTRADA' && (
                                 <>
                                     <div>
-                                        <label className="block text-xs font-medium text-gray-700 mb-1">Código do Lote *</label>
+                                        <label className="block text-xs font-medium text-gray-600 mb-1.5">Código do Lote *</label>
                                         <input
                                             type="text"
                                             required
                                             value={movementData.loteCodigo}
                                             onChange={(e) => setMovementData({ ...movementData, loteCodigo: e.target.value })}
-                                            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
+                                            className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
                                             placeholder="LOTE001"
                                         />
                                     </div>
 
                                     <div>
-                                        <label className="block text-xs font-medium text-gray-700 mb-1">Data de Validade</label>
+                                        <label className="block text-xs font-medium text-gray-600 mb-1.5">Data de Validade</label>
                                         <input
                                             type="date"
                                             value={movementData.validade}
                                             onChange={(e) => setMovementData({ ...movementData, validade: e.target.value })}
-                                            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
+                                            className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
                                         />
                                     </div>
 
                                     <div>
-                                        <label className="block text-xs font-medium text-gray-700 mb-1">Nota Fiscal</label>
+                                        <label className="block text-xs font-medium text-gray-600 mb-1.5">Nota Fiscal</label>
                                         <input
                                             type="text"
                                             value={movementData.notaFiscal}
                                             onChange={(e) => setMovementData({ ...movementData, notaFiscal: e.target.value })}
-                                            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
+                                            className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
                                             placeholder="NF001"
                                         />
                                     </div>
@@ -305,19 +295,17 @@ const Dashboard = ({ products }) => {
                             )}
 
                             {/* Botões */}
-                            <div className="flex space-x-3 pt-4">
+                            <div className="flex gap-3 pt-4">
                                 <button
                                     type="button"
-                                    onClick={() => {
-                                        setMovementData({ productId: '', quantity: 1, loteCodigo: '', validade: '', notaFiscal: '' });
-                                    }}
-                                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium"
+                                    onClick={() => setMovementData({ productId: '', quantity: 1, loteCodigo: '', validade: '', notaFiscal: '' })}
+                                    className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition-colors text-sm font-medium"
                                 >
                                     Cancelar
                                 </button>
                                 <button
                                     type="submit"
-                                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                                    className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors text-sm font-medium shadow-sm"
                                 >
                                     {movementType === 'ENTRADA' ? 'Confirmar Entrada' : 'Confirmar Saída'}
                                 </button>
