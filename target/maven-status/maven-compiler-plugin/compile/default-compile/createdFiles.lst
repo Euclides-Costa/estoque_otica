@@ -1,0 +1,12 @@
+com\example\demo\ProdutoRepository.class
+com\example\demo\DemoApplication.class
+com\example\demo\LoteRepository.class
+com\example\demo\EstoqueService.class
+com\example\demo\Lote.class
+com\example\demo\MovimentacaoRepository.class
+com\example\demo\EstoqueController$VendaRequest.class
+com\example\demo\Movimentacao.class
+com\example\demo\Produto.class
+com\example\demo\EstoqueController$1.class
+com\example\demo\EstoqueController$EntradaRequest.class
+com\example\demo\EstoqueController.class

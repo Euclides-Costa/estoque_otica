@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ErpPro - Sistema de Gestão de Estoque</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: #f5f6fa;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        /* Card Hover Effect */
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Table Row Hover */
+        .table-row:hover {
+            background-color: #f8fafc;
+        }
+
+        /* Button Transitions */
+        button {
+            transition: all 0.2s ease;
+        }
+
+        /* Input Focus */
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            ring: 2px solid #3b82f6;
+            border-color: #3b82f6;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+<div id="app">
+    <!-- Main Container -->
+    <div class="min-h-screen">
+        <!-- Top Navigation Bar -->
+        <nav class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+            <div class="px-6 py-3">
+                <div class="flex items-center justify-between">
+                    <!-- Logo -->
+                    <div class="flex items-center space-x-8">
+                        <div class="flex items-center space-x-2">
+                            <div class="bg-blue-600 rounded-lg p-1.5">
+                                <i class="fas fa-chart-line text-white text-lg"></i>
+                            </div>
+                            <span class="text-xl font-bold text-gray-800">ErpPro</span>
+                            <span class="text-xs text-gray-400 ml-1">Sistema de Gestão</span>
+                        </div>
+
+                        <!-- Navigation Menu -->
+                        <div class="hidden md:flex space-x-1">
+                            <button class="nav-item px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg transition-colors">
+                                Dashboard
+                            </button>
+                            <button class="nav-item px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
+                                Estoque
+                            </button>
+                            <button class="nav-item px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
+                                Vendas
+                            </button>
+                            <button class="nav-item px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
+                                Compras
+                            </button>
+                            <button class="nav-item px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
+                                Relatórios
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right Side - Search & User -->
+                    <div class="flex items-center space-x-4">
+                        <!-- Search Bar -->
+                        <div class="relative hidden lg:block">
+                            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                            <input
+                                    type="text"
+                                    placeholder="Buscar produtos, clientes..."
+                                    class="pl-10 pr-4 py-1.5 text-sm border border-gray-200 rounded-lg w-80 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
+                            >
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <button class="relative p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                            <i class="fas fa-bell text-gray-600 text-lg"></i>
+                            <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                        </button>
+                        <button class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                            <i class="fas fa-cog text-gray-600 text-lg"></i>
+                        </button>
+
+                        <div class="h-6 w-px bg-gray-200"></div>
+
+                        <!-- User Menu -->
+                        <div class="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 px-3 py-1.5 rounded-lg transition-colors">
+                            <div class="bg-gray-200 rounded-full p-1.5">
+                                <i class="fas fa-user text-gray-600 text-sm"></i>
+                            </div>
+                            <div class="hidden md:block">
+                                <p class="text-sm font-medium text-gray-700">Admin User</p>
+                                <p class="text-xs text-gray-400">admin@erppro.com</p>
+                            </div>
+                            <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-6 py-6">
+            <!-- Page Header -->
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold text-gray-800">Dashboard</h1>
+                <p class="text-sm text-gray-500 mt-1">Visão geral do seu negócio</p>
+            </div>
+
+            <!-- Stats Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+                <!-- Card 1: Total em Estoque -->
+                <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="bg-blue-100 rounded-lg p-2.5">
+                            <i class="fas fa-boxes text-blue-600 text-lg"></i>
+                        </div>
+                        <span class="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
+                                <i class="fas fa-arrow-up text-xs mr-1"></i>+12.5%
+                            </span>
+                    </div>
+                    <p class="text-2xl font-bold text-gray-800">1.234</p>
+                    <p class="text-sm text-gray-600 mt-1">Total em Estoque</p>
+                    <p class="text-xs text-gray-400 mt-2">unidades</p>
+                </div>
+
+                <!-- Card 2: Valor em Estoque -->
+                <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="bg-green-100 rounded-lg p-2.5">
+                            <i class="fas fa-dollar-sign text-green-600 text-lg"></i>
+                        </div>
+                        <span class="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
+                                <i class="fas fa-arrow-up text-xs mr-1"></i>+8.2%
+                            </span>
+                    </div>
+                    <p class="text-2xl font-bold text-gray-800">R$ 47.025,80</p>
+                    <p class="text-sm text-gray-600 mt-1">Valor em Estoque</p>
+                    <p class="text-xs text-gray-400 mt-2">valor total</p>
+                </div>
+
+                <!-- Card 3: Produtos Vencendo -->
+                <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="bg-yellow-100 rounded-lg p-2.5">
+                            <i class="fas fa-calendar-alt text-yellow-600 text-lg"></i>
+                        </div>
+                        <span class="text-xs font-medium text-gray-600 bg-gray-50 px-2 py-1 rounded-full">
+                                <i class="fas fa-minus text-xs mr-1"></i>0
+                            </span>
+                    </div>
+                    <p class="text-2xl font-bold text-gray-800">0</p>
+                    <p class="text-sm text-gray-600 mt-1">Produtos Vencendo</p>
+                    <p class="text-xs text-gray-400 mt-2">próximos 30 dias</p>
+                </div>
+
+                <!-- Card 4: Estoque Baixo -->
+                <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="bg-red-100 rounded-lg p-2.5">
+                            <i class="fas fa-exclamation-triangle text-red-600 text-lg"></i>
+                        </div>
+                        <span class="text-xs font-medium text-red-600 bg-red-50 px-2 py-1 rounded-full">
+                                <i class="fas fa-arrow-up text-xs mr-1"></i>+2
+                            </span>
+                    </div>
+                    <p class="text-2xl font-bold text-gray-800">1</p>
+                    <p class="text-sm text-gray-600 mt-1">Estoque Baixo</p>
+                    <p class="text-xs text-gray-400 mt-2">abaixo do mínimo</p>
+                </div>
+            </div>
+
+            <!-- Two Column Layout -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Left Column: Produtos Críticos Table -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div class="px-5 py-4 border-b border-gray-200 bg-gray-50">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2">
+                                    <i class="fas fa-exclamation-triangle text-red-500"></i>
+                                    <h2 class="text-sm font-semibold text-gray-700">Produtos com Estoque Crítico</h2>
+                                </div>
+                                <span class="text-xs text-gray-500">Total: 1 item</span>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Produto</th>
+                                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">SKU</th>
+                                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Marca</th>
+                                    <th class="px-5 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Qtd. Atual</th>
+                                    <th class="px-5 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Mínimo</th>
+                                </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100">
+                                <tr class="table-row hover:bg-gray-50 transition-colors">
+                                    <td class="px-5 py-3 text-sm text-gray-800">Armação Ray-Ban RF11</td>
+                                    <td class="px-5 py-3 text-sm text-gray-600">RF11-001</td>
+                                    <td class="px-5 py-3 text-sm text-gray-600">Ray-Ban</td>
+                                    <td class="px-5 py-3 text-right text-sm font-semibold text-red-600">2 un.</td>
+                                    <td class="px-5 py-3 text-right text-sm text-gray-500">5 un.</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="px-5 py-3 bg-gray-50 border-t border-gray-200 text-center">
+                            <button class="text-xs text-blue-600 hover:text-blue-700 font-medium">
+                                Ver todos os produtos →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Registrar Entrada Form -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                    <div class="px-5 py-4 border-b border-gray-200 bg-gray-50">
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-truck text-blue-500"></i>
+                            <h2 class="text-sm font-semibold text-gray-700">Registrar Entrada</h2>
+                        </div>
+                    </div>
+                    <form id="stockForm" class="p-5 space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">Tipo de Movimento</label>
+                            <div class="flex space-x-2">
+                                <button type="button" class="movement-type-btn flex-1 py-2 text-sm rounded-lg bg-blue-600 text-white transition-colors" data-type="ENTRADA">
+                                    Entrada (Compra)
+                                </button>
+                                <button type="button" class="movement-type-btn flex-1 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors" data-type="SAIDA">
+                                    Saída (Venda)
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">Produto *</label>
+                            <select required class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:border-blue-400">
+                                <option value="">Selecione um produto</option>
+                                <option value="1">Armação Ray-Ban - ARM-001</option>
+                                <option value="2">Lente Acuvue - LENTE-001</option>
+                                <option value="3">Armação Ray-Ban RF11 - RF11-001</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">Quantidade *</label>
+                            <input type="number" required min="1" value="1" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:border-blue-400">
+                        </div>
+
+                        <div id="entryFields">
+                            <div class="mb-4">
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Código do Lote *</label>
+                                <input type="text" required class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:border-blue-400" placeholder="LOTE001">
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Data de Validade</label>
+                                <input type="date" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:border-blue-400">
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Nota Fiscal</label>
+                                <input type="text" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:border-blue-400" placeholder="NF001">
+                            </div>
+                        </div>
+
+                        <div class="flex space-x-3 pt-4">
+                            <button type="button" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium">
+                                Cancelar
+                            </button>
+                            <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
+                                Confirmar Entrada
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Recent Movements Section -->
+            <div class="mt-6">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="px-5 py-4 border-b border-gray-200 bg-gray-50">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-history text-gray-500"></i>
+                                <h2 class="text-sm font-semibold text-gray-700">Últimos Movimentos</h2>
+                            </div>
+                            <button class="text-xs text-blue-600 hover:text-blue-700 font-medium">
+                                Ver histórico completo
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50 border-b border-gray-200">
+                            <tr>
+                                <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Data/Hora</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Produto</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Tipo</th>
+                                <th class="px-5 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Quantidade</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Usuário</th>
+                            </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                            <tr class="table-row hover:bg-gray-50 transition-colors">
+                                <td class="px-5 py-3 text-sm text-gray-600">22/04/2026 14:30</td>
+                                <td class="px-5 py-3 text-sm text-gray-800">Armação Ray-Ban</td>
+                                <td class="px-5 py-3">
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                                                <i class="fas fa-arrow-down mr-1 text-xs"></i> Entrada
+                                            </span>
+                                </td>
+                                <td class="px-5 py-3 text-right text-sm font-medium text-gray-800">+15 un.</td>
+                                <td class="px-5 py-3 text-sm text-gray-600">ADMIN</td>
+                            </tr>
+                            <tr class="table-row hover:bg-gray-50 transition-colors">
+                                <td class="px-5 py-3 text-sm text-gray-600">22/04/2026 11:15</td>
+                                <td class="px-5 py-3 text-sm text-gray-800">Lente Acuvue</td>
+                                <td class="px-5 py-3">
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                                                <i class="fas fa-arrow-up mr-1 text-xs"></i> Saída
+                                            </span>
+                                </td>
+                                <td class="px-5 py-3 text-right text-sm font-medium text-gray-800">-1 un.</td>
+                                <td class="px-5 py-3 text-sm text-gray-600">VENDEDOR</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+    // JavaScript para alternar entre entrada e saída
+    const movementButtons = document.querySelectorAll('.movement-type-btn');
+    const entryFields = document.getElementById('entryFields');
+    const submitButton = document.querySelector('button[type="submit"]');
+
+    movementButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Reset all buttons
+            movementButtons.forEach(b => {
+                b.classList.remove('bg-blue-600', 'text-white');
+                b.classList.add('bg-gray-100', 'text-gray-700');
+            });
+
+            // Style current button
+            this.classList.remove('bg-gray-100', 'text-gray-700');
+            this.classList.add('bg-blue-600', 'text-white');
+
+            const type = this.getAttribute('data-type');
+
+            if (type === 'ENTRADA') {
+                entryFields.style.display = 'block';
+                submitButton.textContent = 'Confirmar Entrada';
+            } else {
+                entryFields.style.display = 'none';
+                submitButton.textContent = 'Confirmar Saída';
+            }
+        });
+    });
+
+    // Form submission
+    document.getElementById('stockForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        alert('Movimento registrado com sucesso!');
+        // Aqui você implementaria a chamada à API
+    });
+
+    // Navigation menu items
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', function() {
+            document.querySelectorAll('.nav-item').forEach(nav => {
+                nav.classList.remove('text-blue-600', 'bg-blue-50');
+                nav.classList.add('text-gray-600');
+            });
+            this.classList.remove('text-gray-600');
+            this.classList.add('text-blue-600', 'bg-blue-50');
+        });
+    });
+</script>
+</body>
+</html>
